@@ -16,4 +16,4 @@ rob_answer.%: rob_answer.org
 
 .PHONY clean:
 clean:
-	rm rob_answer.pdf rob_answer.html genomes.txt
+	rm rob_answer.pdf rob_answer.html genomes.txt 50.tsv 100.tsv
