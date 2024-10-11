@@ -3,7 +3,7 @@ benchmark: genomes.txt
 	hyperfine -M 32 './hmmer100.py queries genomes.txt 100.tsv' './hmmer50.py queries genomes.txt 50.tsv'
 
 genomes.txt:
-	fd -e faa >| genomes.txt
+	fd -I -e faa >| genomes.txt
 
 
 .PHONY docs:
