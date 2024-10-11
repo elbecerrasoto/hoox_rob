@@ -1,0 +1,101 @@
+#+title: Mejoras Rob
+
+* Run minum Benchmark
+
+** Requires:
++ python stuff
++ hyperfine https://github.com/sharkdp/hyperfine
++ Obvio tienes /GNU Make/ hueon!
+*** optional
++ pandoc
++ fd
+
+** code
+
+#+begin_src shell
+make bench
+#+end_src
+
+
+* Ema's Comments <2024-10-11 Fri>
+
+Me gusto lo de checar existencias de files.
+Es casi gratis porque ya tengo mis paths en Path ojbects.
+El framework que estoy usando (snakemake) ya checa por existencia
+de files, pero me gusta duplicar esa parte, hace todo mas robusto.
+
+Lo de usar iteradores y la clase esa de HMMFiles la copie de la
+documentacion.
+
+Me falta practica con la programacion asincrona y concurrente,
+gracias por todos los comentarios.
+
+El codigo lo saque como dice Rolas que no programemos, mas practica que ciencia.
+
+Lo de ~np.array_split~ fue como una manera manual de hacer los chuncksizes.
+
+Claramente esta mal porque divido mi lista otra vez en el mismo numero de elementos.
+y la idento una vez mas:
+de ~[input1 , input2, input3]~ pasa a ~[[input1], [input2], [input3]]~.
+Y de acuerdo al zen de Python /Flat is better than nested/.
+
+Igual lo deje asi porque si se quiere implementar los /batches size/ como arg externo
+la maquinaria ya esta. De hecho agregue un linea de codigo para hacerlo mas claro.
+
+Haciendo benchmarks descubri que lo mejor es pasar batch size de 1.
+
+Y eso es lo raro, que si lo paso identado, uso mis CPUs al 100% y de la otra menera
+como al 50%.
+
+Y si hmmsearch ya es paralelo. Pero tengo ~m genomes~ y ~n profiles~.
+
+La operacion minima de busqueda es /1 a 1/, /1 perfil contra 1 genoma/.
+~hmmsearch~ paraleliza usando /profiles/.
+
+Mi principal /use-case/ es con muchos genomas e.g. unos 100,000 y
+pocos profiles unos 1-4. /hmmsearch/ fue desarrollado para el caso
+contrario unos 100-200 genomas contra unos 10,000 perfiles.
+
+Mi idea era tambien paralelizar para cuando los perfiles fueran
+menos de 12 (mi numero de CPUs).
+
+Tambien me da miedo pensar que
+mis experimentos son algo muy particular de mi sistema.
+Que si mis CPUs no quieran llegar al 100 es porque mi scheduler asi lo
+quiere.
+
+Pero bueno despues de jugar con varios refactors y jugandole con chuncksize,
+y yo mismo haciendo manualmente los chuncksizes, con numpy, la version que ves
+es a lo que llegue.
+
+Creo que algo tiene que ver tambien con pickles. El top hits object que es lo
+que regresa la funcion de busqueda no tiene implementado el pickle protocol
+y el multiprocessing Pool requiere esa maquinaria.
+
+Ya que otros refactors no funcionaban, no se si la identacion de mis objectos los
+"protege del pickle".
+
+Te mando un test minimo para el benchmark.
+
+** Thread approach
+
+De hecho del github del dude de pyhmmer:
+
+Usando la ~multiprocessing.pool.ThreadPool~ como sugieren
+no ayuda.
+
+https://github.com/althonos/pyhmmer/issues/21
+#+begin_src txt
+Hi,
+I would work with multiple CPU, but I don't understand how to give more than one CPU to pyhmmer.
+So I tried to use multiprocessing packages, but pyhmmer object are non-trivial __cinit__.
+Example :
+multiprocessing.pool.MaybeEncodingError: Error sending result: '<pyhmmer.plan7.TopHits object at 0x561959114ad0>'. Reason: 'TypeError('no default __reduce__ due to non-trivial __cinit__')'
+
+Could you give me an example to use pyhmmer with more than one CPU if it's possible ?
+Thanks
+
+Hi @jpjarnoux
+
+pyhmmer releases the GIL where applicable, so you don't have to use processes to get it to work, threads will work efficiently as well. Try using multiprocessing.pool.ThreadPool instead of multiprocessing.pool.Pool, this should already give you some decent performance (or use pyhmmer.hmmsearch which does it for you). Otherwise, I'll try adding pickle support to TopHits when I have some time.
+#+end_src

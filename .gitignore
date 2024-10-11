@@ -1,0 +1,6 @@
+*.tsv
+genomes
+queries
+rob_answer.*
+!rob_answer.org
+genomes.txt
