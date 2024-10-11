@@ -6,15 +6,35 @@
 + python stuff
 + hyperfine https://github.com/sharkdp/hyperfine
 + Obvio tienes /GNU Make/ hueon!
++ fd
 *** optional
 + pandoc
-+ fd
 
 ** code
 
 #+begin_src shell
-make bench
+make benchmark
 #+end_src
+
+
+* Que Piensas?
+
+
+* Stuff that I've learned preparing this benchmarks:
+
+On a few genomes about 40-60, the simpler approach wins.
+That is using the parallel mapping one genome at time.
+
+Por alguna razon los tiempos me dan muy similares tanto en ~make benchmark~
+y ~make benchmark-few~.
+Haciendo nada de diferencia en el mundo real.
+
+Pero te digo en mis benchmarks hace unas semanas la diferencia era del 50%.
+Uno tardaba 15 min y el otro 2 horas.
+
+Mi hipotesis es ahora:
+Supongo que es el Scheduler ... y pss si la neta no anda trackeando
+cuando se actualiza mi rolling release de manjaro.
 
 
 * Ema's Comments <2024-10-11 Fri>
